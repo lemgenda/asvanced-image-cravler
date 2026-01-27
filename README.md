@@ -1,9 +1,12 @@
 # onnx-ai-models
 Byte-identical, WebGPU-compatible ONNX files
 
-This mimics the Flax MAXIM reference (deep encoder → bottleneck → wide decoder).
 
-## Why this works:
-- Each chunk uses < 300 MB VRAM
-- VRAM is released between chunk calls
-- No single kernel dispatch allocates the entire attention block at once
+| File                              | Purpose            | WebGPU               |
+| --------------------------------- | ------------------ | -------------------- |
+| `maxim_s3_op16_fp32.onnx`         | Raw export         | ❌ Too large          |
+| `maxim_s3_fp16.onnx`              | FP16               | ⚠ Still heavy        |
+| `maxim_s3_fp16_fused.onnx`        | Fused-attention    | ✔ Best performance   |
+| `maxim_s3_fp16_fused_simple.onnx` | Fused + simplified | ✔ Most reliable      |
+| `maxim_s3_fp16_webgpu_tiled.onnx` | Tiled version      | ✔ Guaranteed to load |
+
