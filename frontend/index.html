@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Image Crawler</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- API Status Indicator -->
+        <div class="api-status" id="apiStatus">
+            <i class="fas fa-circle"></i> <span>Connecting...</span>
+        </div>
+
+        <!-- Keyboard Shortcuts Helper -->
+        <div class="keyboard-shortcuts" id="keyboardShortcuts">
+            <h4><i class="fas fa-keyboard"></i> Keyboard Shortcuts</h4>
+            <div class="keyboard-shortcut">
+                <span>Start Crawling</span>
+                <kbd class="key">Ctrl + Enter</kbd>
+            </div>
+            <div class="keyboard-shortcut">
+                <span>Open Settings</span>
+                <kbd class="key">Ctrl + ,</kbd>
+            </div>
+            <div class="keyboard-shortcut">
+                <span>Download All</span>
+                <kbd class="key">Ctrl + D</kbd>
+            </div>
+            <div class="keyboard-shortcut">
+                <span>Toggle Logs</span>
+                <kbd class="key">Ctrl + L</kbd>
+            </div>
+            <div class="keyboard-shortcut">
+                <span>Clear All</span>
+                <kbd class="key">Ctrl + Shift + C</kbd>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-spider"></i> Advanced Image Crawler</h1>
+            <p>Crawl websites and download images with intelligent organization</p>
+            <div class="header-stats">
+                <div class="stat-item">
+                    <i class="fas fa-bolt"></i>
+                    <span>Distributed Crawling: <span id="distributedStatus">Off</span></span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Proxy: <span id="proxyStatus">Disabled</span></span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Rate Limit: <span id="rateLimitStatus">10 req/sec</span></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Card -->
+        <div class="main-card">
+            <!-- Input Section -->
+            <div class="input-section">
+                <div class="url-input-group">
+                    <div class="input-with-icon">
+                        <i class="fas fa-link"></i>
+                        <input type="url" class="url-input" id="urlInput" 
+                               placeholder="https://example.com" 
+                               value="https://unsplash.com">
+                    </div>
+                    <button class="btn btn-primary" id="crawlBtn">
+                        <i class="fas fa-play"></i> Start Crawling
+                    </button>
+                    <button class="btn btn-secondary" id="stopBtn" style="display: none;">
+                        <i class="fas fa-stop"></i> Stop
+                    </button>
+                </div>
+                
+                <!-- Quick Options -->
+                <div class="quick-options">
+                    <button class="btn-quick-option" id="toggleAdvancedOptions">
+                        <i class="fas fa-sliders-h"></i> Advanced Options
+                    </button>
+                    <button class="btn-quick-option" id="loadPreset">
+                        <i class="fas fa-bookmark"></i> Load Preset
+                    </button>
+                    <button class="btn-quick-option" id="savePreset">
+                        <i class="fas fa-save"></i> Save Preset
+                    </button>
+                </div>
+                
+                <!-- Advanced Options Accordion -->
+                <div class="accordion" id="advancedOptionsAccordion">
+                    <div class="accordion-header">
+                        <h3><i class="fas fa-cog"></i> Advanced Options</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="options-grid">
+                            <!-- Crawling Options -->
+                            <div class="option-group">
+                                <label for="maxDepth"><i class="fas fa-sitemap"></i> Max Crawl Depth</label>
+                                <div class="slider-container">
+                                    <input type="range" id="maxDepth" min="1" max="5" value="2" class="slider">
+                                    <span class="slider-value" id="maxDepthValue">2</span>
+                                </div>
+                            </div>
+                            
+                            <div class="option-group">
+                                <label for="maxPages"><i class="fas fa-file-alt"></i> Max Pages</label>
+                                <input type="number" id="maxPages" class="number-input" min="1" max="500" value="50">
+                            </div>
+                            
+                            <!-- Image Filtering -->
+                            <div class="option-group">
+                                <label for="minWidth"><i class="fas fa-expand-alt"></i> Min Width (px)</label>
+                                <input type="number" id="minWidth" class="number-input" min="1" value="100">
+                            </div>
+                            
+                            <div class="option-group">
+                                <label for="minHeight"><i class="fas fa-arrows-alt-v"></i> Min Height (px)</label>
+                                <input type="number" id="minHeight" class="number-input" min="1" value="100">
+                            </div>
+                            
+                            <div class="option-group">
+                                <label for="maxSize"><i class="fas fa-weight-hanging"></i> Max Size (KB)</label>
+                                <input type="number" id="maxSize" class="number-input" min="1" value="10240">
+                            </div>
+                            
+                            <div class="option-group">
+                                <label for="quality"><i class="fas fa-star"></i> Quality (%)</label>
+                                <div class="slider-container">
+                                    <input type="range" id="quality" min="1" max="100" value="80" class="slider">
+                                    <span class="slider-value" id="qualityValue">80%</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Image Types -->
+                            <div class="option-group">
+                                <label><i class="fas fa-file-image"></i> Image Formats</label>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="imageTypes" value="jpg" checked> JPG
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="imageTypes" value="png" checked> PNG
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="imageTypes" value="gif"> GIF
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="imageTypes" value="webp"> WebP
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="imageTypes" value="svg"> SVG
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Category Mode -->
+                            <div class="option-group">
+                                <label for="categoryMode"><i class="fas fa-folder"></i> Category Mode</label>
+                                <select id="categoryMode" class="select-input">
+                                    <option value="path">URL Path Based</option>
+                                    <option value="page">Page Title Based</option>
+                                    <option value="domain">Domain Based</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Rate Limiting -->
+                            <div class="option-group">
+                                <label for="rateLimit"><i class="fas fa-tachometer-alt"></i> Rate Limit</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="rateLimit" class="number-input" min="1" max="50" value="10">
+                                    <span class="unit">req/sec</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Request Delay -->
+                            <div class="option-group">
+                                <label for="requestDelay"><i class="fas fa-clock"></i> Request Delay (ms)</label>
+                                <input type="number" id="requestDelay" class="number-input" min="0" max="5000" value="100">
+                            </div>
+                            
+                            <!-- Advanced Features -->
+                            <div class="option-group">
+                                <label class="switch-label">
+                                    <input type="checkbox" id="detectDuplicates" checked>
+                                    <span class="switch"></span>
+                                    <span class="switch-text"><i class="fas fa-copy"></i> Detect Duplicates</span>
+                                </label>
+                            </div>
+                            
+                            <div class="option-group">
+                                <label class="switch-label">
+                                    <input type="checkbox" id="respectRobots" checked>
+                                    <span class="switch"></span>
+                                    <span class="switch-text"><i class="fas fa-robot"></i> Respect robots.txt</span>
+                                </label>
+                            </div>
+                            
+                            <div class="option-group">
+                                <label class="switch-label">
+                                    <input type="checkbox" id="advancedCrawling">
+                                    <span class="switch"></span>
+                                    <span class="switch-text"><i class="fas fa-magic"></i> Advanced Crawling</span>
+                                </label>
+                            </div>
+                            
+                            <div class="option-group">
+                                <label class="switch-label">
+                                    <input type="checkbox" id="distributedCrawling">
+                                    <span class="switch"></span>
+                                    <span class="switch-text"><i class="fas fa-server"></i> Distributed Crawling</span>
+                                </label>
+                            </div>
+                            
+                            <div class="option-group">
+                                <label class="switch-label">
+                                    <input type="checkbox" id="useProxy">
+                                    <span class="switch"></span>
+                                    <span class="switch-text"><i class="fas fa-user-secret"></i> Use Proxy</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Display -->
+            <div class="error-message" id="errorMessage"></div>
+
+            <!-- Progress Section -->
+            <div class="progress-section">
+                <div class="progress-header">
+                    <h3><i class="fas fa-chart-line"></i> Crawling Progress</h3>
+                    <div class="progress-actions">
+                        <button class="btn btn-small btn-secondary" id="pauseBtn" style="display: none;">
+                            <i class="fas fa-pause"></i> Pause
+                        </button>
+                        <button class="btn btn-small btn-danger" id="cancelBtn" style="display: none;">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                
+                <div class="progress-stats">
+                    <div class="stat">
+                        <i class="fas fa-images"></i>
+                        <span>Images: <span id="imageCount">0</span></span>
+                    </div>
+                    <div class="stat">
+                        <i class="fas fa-folder"></i>
+                        <span>Categories: <span id="categoryCount">0</span></span>
+                    </div>
+                    <div class="stat">
+                        <i class="fas fa-times-circle"></i>
+                        <span>Duplicates: <span id="duplicateCount">0</span></span>
+                    </div>
+                    <div class="stat">
+                        <i class="fas fa-filter"></i>
+                        <span>Filtered: <span id="filteredCount">0</span></span>
+                    </div>
+                    <div class="stat">
+                        <i class="fas fa-clock"></i>
+                        <span>Time: <span id="timeElapsed">0s</span></span>
+                    </div>
+                </div>
+                
+                <div class="progress-details">
+                    <div class="detail-item">
+                        <i class="fas fa-globe"></i>
+                        <span id="currentPage">Ready to crawl</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Speed: <span id="crawlSpeed">0 pages/min</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Distributed Crawling Panel -->
+            <div class="distributed-panel" id="distributedPanel" style="display: none;">
+                <div class="panel-header">
+                    <h4><i class="fas fa-server"></i> Distributed Crawling</h4>
+                    <div class="cluster-status" id="clusterStatus">
+                        <span class="status-indicator idle"></span>
+                        <span>Cluster: Offline</span>
+                    </div>
+                </div>
+                <div class="cluster-stats" id="clusterStats">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Loading Overlay -->
+            <div class="loading-overlay" id="loadingOverlay">
+                <div class="loading-content">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">
+                        <h4 id="loadingTitle">Initializing Crawler</h4>
+                        <p id="loadingMessage">Preparing to crawl website...</p>
+                    </div>
+                </div>
+                <div class="loading-progress">
+                    <div class="loading-bar" id="loadingBar"></div>
+                </div>
+                <div class="loading-stats">
+                    <span id="loadingPages">0 pages</span>
+                    <span id="loadingImages">0 images</span>
+                    <span id="loadingSpeed">0/sec</span>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div class="results-section" id="resultsSection">
+                <div class="results-header">
+                    <h2><i class="fas fa-folder-tree"></i> Organized Images</h2>
+                    <div class="results-actions">
+                        <div class="results-stats">
+                            <span><i class="fas fa-images"></i> <span id="totalImagesCount">0</span> images</span>
+                            <span><i class="fas fa-folder"></i> <span id="totalCategoriesCount">0</span> categories</span>
+                            <span><i class="fas fa-sd-card"></i> <span id="totalSize">0 KB</span></span>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-secondary" id="exportJsonBtn">
+                                <i class="fas fa-file-export"></i> Export JSON
+                            </button>
+                            <button class="btn btn-success" id="downloadAllBtn">
+                                <i class="fas fa-download"></i> Download All
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Download Options -->
+                <div class="download-options">
+                    <h4><i class="fas fa-download"></i> Download Options</h4>
+                    <div class="download-buttons">
+                        <button class="btn btn-primary" id="downloadAllSiteBtn">
+                            <i class="fas fa-globe"></i> All Site Images
+                        </button>
+                        <button class="btn btn-primary" id="downloadAllCategoriesBtn">
+                            <i class="fas fa-folder"></i> All Categories
+                        </button>
+                        <button class="btn btn-primary" id="downloadByPageBtn">
+                            <i class="fas fa-file"></i> By Page
+                        </button>
+                        <button class="btn btn-primary" id="downloadSelectedBtn">
+                            <i class="fas fa-check-square"></i> Selected Only
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Category Navigation -->
+                <div class="category-navigation" id="categoryNavigation">
+                    <!-- Categories will be added here -->
+                </div>
+                
+                <!-- Category List -->
+                <div class="category-list" id="categoryList"></div>
+                
+                <!-- Pages List (hidden by default) -->
+                <div class="pages-list" id="pagesList" style="display: none;"></div>
+            </div>
+
+            <!-- Logs Section -->
+            <div class="logs-section">
+                <div class="logs-header">
+                    <h3><i class="fas fa-clipboard-list"></i> Activity Log</h3>
+                    <div class="log-controls">
+                        <div class="log-filters">
+                            <label class="checkbox-label small">
+                                <input type="checkbox" class="log-filter" value="info" checked> Info
+                            </label>
+                            <label class="checkbox-label small">
+                                <input type="checkbox" class="log-filter" value="success" checked> Success
+                            </label>
+                            <label class="checkbox-label small">
+                                <input type="checkbox" class="log-filter" value="warning" checked> Warning
+                            </label>
+                            <label class="checkbox-label small">
+                                <input type="checkbox" class="log-filter" value="error" checked> Error
+                            </label>
+                        </div>
+                        <div class="log-buttons">
+                            <button class="btn btn-small" id="clearLogsBtn" title="Clear Logs">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            <button class="btn btn-small" id="exportLogsBtn" title="Export Logs">
+                                <i class="fas fa-download"></i>
+                            </button>
+                            <button class="btn btn-small" id="toggleLogsBtn" title="Toggle Logs">
+                                <i class="fas fa-chevron-up"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="log-content" id="logContent">
+                    <div class="log-entry info">
+                        <span class="log-time">[00:00:00]</span>
+                        <span class="log-message">Image crawler initialized. Enter a URL to start.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-content">
+                <div class="footer-stats">
+                    <span><i class="fas fa-history"></i> Last crawl: <span id="lastCrawlTime">Never</span></span>
+                    <span><i class="fas fa-database"></i> Cache: <span id="cacheSize">0 MB</span></span>
+                    <span><i class="fas fa-memory"></i> Memory: <span id="memoryUsage">0 MB</span></span>
+                </div>
+                <div class="footer-links">
+                    <a href="#" id="settingsButton"><i class="fas fa-cog"></i> Settings</a>
+                    <a href="#" id="helpButton"><i class="fas fa-question-circle"></i> Help</a>
+                    <a href="#" id="aboutButton"><i class="fas fa-info-circle"></i> About</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal (will be created dynamically) -->
+    
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.js"></script>
+    
+    <!-- Main Script -->
+    <script src="script.js"></script>
+</body>
+</html>
